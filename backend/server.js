@@ -1,15 +1,20 @@
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-
+import cors from "cors";
 import { importExcelData } from "./importExcelData.js";  // import your Excel import function
 import Loinc from "./models/loinc.js";                   // import your Mongoose model
-
+import authRoutes from "./routes/auth.js";
+import { protect } from "./middleware/authMiddleware.js";
 dotenv.config();
 
 const app = express();
 app.use(express.json());
-
+app.use(cors({
+  origin: "http://localhost:5173",  
+  methods: ["GET", "POST"],         
+  credentials: true                
+}));
 const PORT = process.env.PORT || 5000;
 
 async function startServer() {
@@ -33,9 +38,10 @@ startServer();
 app.get("/", (req, res) => {
   res.send("Hello from backend!");
 });
+app.use("/auth", authRoutes);
 
-// Search API
-app.get("/search", async (req, res) => {
+// Protect /search with JWT middleware
+app.get("/search", protect, async (req, res) => {
   const query = req.query.query;
   if (!query) return res.status(400).json({ error: "Query parameter is required" });
 
