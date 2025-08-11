@@ -30,7 +30,7 @@ app.use("/auth", authLimiter,authRoutes);
 app.get("/search", protect,searchLimiter, async (req, res) => {
   const query = req.query.query;
   if (!query) return res.status(400).json({ error: "Query parameter is required" });
-
+ const cacheKey = `search:${query}`;
   try {
      const cached = await getCached(cacheKey);
      if (cached) {
