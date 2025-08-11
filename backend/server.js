@@ -6,6 +6,9 @@ import { importExcelData } from "./importExcelData.js";
 import Loinc from "./models/loinc.js";
 import authRoutes from "./routes/auth.js";
 import { protect } from "./middleware/authMiddleware.js";
+import { authLimiter, searchLimiter } from "./middleware/rateLimiter.js"; 
+import { initRedis } from "./utils/redisClient.js";
+import { getCached, setCached } from "./utils/cache.js";
 dotenv.config();
 
 const app = express();
@@ -21,14 +24,19 @@ const PORT = process.env.PORT || 5000;
 app.get("/", (req, res) => {
   res.send("Hello from backend!");
 });
-app.use("/auth", authRoutes);
+app.use("/auth", authLimiter,authRoutes);
 
 // Protect /search with JWT middleware
-app.get("/search", protect, async (req, res) => {
+app.get("/search", protect,searchLimiter, async (req, res) => {
   const query = req.query.query;
   if (!query) return res.status(400).json({ error: "Query parameter is required" });
 
   try {
+     const cached = await getCached(cacheKey);
+     if (cached) {
+      console.log(`🔁 Cache hit for query "${query}"`);
+      return res.json(cached);
+    }
     const results = await Loinc.find(
       { $text: { $search: query } },
       { score: { $meta: "textScore" } }
@@ -36,7 +44,7 @@ app.get("/search", protect, async (req, res) => {
       .sort({ score: { $meta: "textScore" } })
       .limit(10)
       .exec();
-
+await setCached(cacheKey, results, 300);
     res.json(results);
   } catch (err) {
     console.error("Search error:", err);
@@ -62,9 +70,9 @@ async function startServer() {
   try {
     await mongoose.connect(process.env.MONGO_URI);
     console.log("✅ MongoDB connected");
-
+await initRedis();
     // Import Excel data once on server start (comment out if you want to disable)
-    await importExcelData();
+    // await importExcelData();
 
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
