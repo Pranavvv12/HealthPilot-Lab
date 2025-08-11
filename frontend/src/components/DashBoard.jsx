@@ -1,8 +1,10 @@
 import React from 'react'
 import { ShoppingCart, User, Info, Rocket } from 'lucide-react'
 
+
 const DashBoard = ({ onShowLogin, onShowSignup, isAuthenticated, onLogout }) => {
   return (
+    
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -59,7 +61,7 @@ const DashBoard = ({ onShowLogin, onShowSignup, isAuthenticated, onLogout }) => 
         {/* Main Headline */}
         <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
-            Revolutionizing Healthcare, <span className="block">One Click at a Time.</span>
+            Revolutionizing Healthcare, <span className="block">One Search at a Time.</span>
           </h1>
           <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
             Maximize efficiency with our AI-powered healthcare marketplace— Book appointments, get AI-assisted
