@@ -1,23 +1,51 @@
+// models/User.js - Simplified version to isolate issues
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema({
-  username: { type: String, unique: true, required: true },
-  password: { type: String, required: true },
+  username: { 
+    type: String, 
+    unique: true, 
+    required: true
+  },
+  password: { 
+    type: String, 
+    required: true 
+  }
 });
 
-// Hash password before saving
+// Simplified password hashing
 userSchema.pre("save", async function(next) {
-  if (!this.isModified("password")) return next();
-
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-  next();
+  try {
+    // Only hash the password if it's new or modified
+    if (!this.isModified("password")) {
+      return next();
+    }
+    
+    // Generate salt
+    const salt = await bcrypt.genSalt(10);
+    
+    // Hash password
+    this.password = await bcrypt.hash(this.password, salt);
+    
+    next();
+  } catch (error) {
+    console.error("Password hashing error:", error);
+    next(error);
+  }
 });
 
-// Compare password method
+// Simplified password comparison
 userSchema.methods.matchPassword = async function(enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
+  try {
+    return await bcrypt.compare(enteredPassword, this.password);
+  } catch (error) {
+    console.error("Password comparison error:", error);
+    return false;
+  }
 };
 
-export default mongoose.model("User", userSchema);
+// Create the model
+const User = mongoose.model("User", userSchema);
+
+export default User;

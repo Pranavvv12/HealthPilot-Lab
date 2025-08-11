@@ -1,0 +1,117 @@
+// src/components/Signup.jsx
+import React, { useState } from "react";
+
+export default function Signup({ onSignupSuccess }) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
+  const [message, setMessage] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    setError(null);
+    setMessage(null);
+    setLoading(true);
+
+    // Basic validation
+    if (!username || !password) {
+      setError("Username and password are required");
+      setLoading(false);
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:5000/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await res.json();
+      console.log("Signup response:", data); // Debug response
+
+      if (!res.ok) {
+        setError(data.message || "Signup failed");
+      } else {
+        setMessage("Signup successful! Please login.");
+        setUsername("");
+        setPassword("");
+        setTimeout(() => {
+          onSignupSuccess();
+        }, 1500);
+      }
+    } catch (err) {
+      console.error("Signup error:", err);
+      setError("Network error. Please check your connection and try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSignup} style={{ maxWidth: 400, margin: "auto" }}>
+      <h2>Signup</h2>
+      {error && (
+        <p style={{ color: "red", padding: "10px", backgroundColor: "#ffeeee", borderRadius: "4px" }}>
+          {error}
+        </p>
+      )}
+      {message && (
+        <p style={{ color: "green", padding: "10px", backgroundColor: "#eeffee", borderRadius: "4px" }}>
+          {message}
+        </p>
+      )}
+      <div style={{ marginBottom: 15 }}>
+        <label htmlFor="username" style={{ display: "block", marginBottom: 5 }}>
+          Username
+        </label>
+        <input
+          id="username"
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+          style={{ width: "100%", padding: 10, borderRadius: "4px", border: "1px solid #ccc" }}
+        />
+      </div>
+      <div style={{ marginBottom: 15 }}>
+        <label htmlFor="password" style={{ display: "block", marginBottom: 5 }}>
+          Password
+        </label>
+        <input
+          id="password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          style={{ width: "100%", padding: 10, borderRadius: "4px", border: "1px solid #ccc" }}
+        />
+        <small style={{ color: "#666", display: "block", marginTop: 5 }}>
+          Password must be at least 6 characters
+        </small>
+      </div>
+      <button 
+        type="submit" 
+        disabled={loading} 
+        style={{ 
+          width: "100%", 
+          padding: 10, 
+          backgroundColor: loading ? "#cccccc" : "#4CAF50", 
+          color: "white", 
+          border: "none", 
+          borderRadius: "4px", 
+          cursor: loading ? "not-allowed" : "pointer" 
+        }}
+      >
+        {loading ? "Signing up..." : "Signup"}
+      </button>
+    </form>
+  );
+}

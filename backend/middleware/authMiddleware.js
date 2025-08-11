@@ -19,6 +19,7 @@ export const protect = (req, res, next) => {
     req.user = decoded; // you can access user info later via req.user
     next();
   } catch (error) {
+    console.error("Auth middleware error:", error);
     res.status(401).json({ message: "Not authorized, token invalid" });
   }
 };
