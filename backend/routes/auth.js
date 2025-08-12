@@ -40,7 +40,6 @@ router.post("/signup", async (req, res) => {
       return res.status(500).json({ message: "Error creating user" });
     }
     
-    // Save user to database - with separate try/catch
     try {
       console.log("Saving user to database");
       await user.save();

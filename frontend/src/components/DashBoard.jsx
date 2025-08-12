@@ -1,8 +1,9 @@
 import React from 'react'
 import { ShoppingCart, User, Info, Rocket } from 'lucide-react'
-
+import { useNavigate } from 'react-router-dom'; 
 
 const DashBoard = ({ onShowLogin, onShowSignup, isAuthenticated, onLogout }) => {
+    const navigate = useNavigate();
   return (
     
     <div className="min-h-screen bg-gray-50">
@@ -19,7 +20,10 @@ const DashBoard = ({ onShowLogin, onShowSignup, isAuthenticated, onLogout }) => 
 
             {/* Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
-              <button className="text-gray-700 hover:text-gray-900 font-medium">
+                <button
+                onClick={() => navigate('/dashboard')}  // navigate to dashboard on click
+                className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
+              >
                 Home
               </button>
               
